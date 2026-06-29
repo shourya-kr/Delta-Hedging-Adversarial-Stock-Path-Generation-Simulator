@@ -35,3 +35,25 @@ def implied_volatility(observed_price, S, K, T, r, option_type, tol=1e-5, max_it
     return mid_vol # Return the best guess if max_iter reached
 
 print("Implied Volatility solver defined.")
+
+if S is not None:
+    options_df['implied_volatility'] = options_df.apply(
+        lambda row: implied_volatility(row['last_trade_price'], S, row['strike'], row['T'], r, row['option_type'], verbose=True)
+        if row['T'] > 0 else 0, axis=1
+    )
+else:
+    options_df['implied_volatility'] = np.nan
+    print("Cannot calculate implied volatility as future price (S) is not available.")
+
+display(options_df[['symbol', 'strike', 'option_type', 'last_trade_price', 'implied_volatility']].head())
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=options_df, x='strike', y='implied_volatility', hue='option_type', marker='o')
+plt.title('Implied Volatility vs. Strike Price (at 11 AM)')
+plt.xlabel('Strike Price')
+plt.ylabel('Implied Volatility')
+plt.grid(True)
+plt.show()
